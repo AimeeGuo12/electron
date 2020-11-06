@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信息弹窗</title>
+</head>
+
+<body>
+    <h2>贴心断网提醒</h2>
+    <button id='notifyBtn'>消息通知</button>
+    <div>
+        激活码：<span id='code'>xajkjdksajdlsjdjls</span>
+        <button id='copyBtn'>复制激活码</button>
+    </div>
+
+</body>
+<script>
+    let notifyBtn = document.getElementById('notifyBtn')
+    window.addEventListener('online', function () {
+        alert('来了来了，来网了！')
+    })
+    window.addEventListener('offline', function () {
+        alert('哇哦， 没网了！')
+    })
+
+    // 消息通知
+    let option = {
+        title: '小二，接客了',
+        body: '官人， 来了！'
+    }
+    notifyBtn.onclick = function () {
+        console.log('进入')
+        // new window.Notification(option.title, option)
+
+        if (window.Notification) {
+            debugger
+            var ua = navigator.userAgent.toLowerCase();
+            if (ua.indexOf('safari') != -1) {
+                if (ua.indexOf('chrome') > -1) {
+                    // Chrome
+                    Notification.requestPermission().then(function (permission) {
+                        if (permission == "granted") {
+                            var notification = new Notification('桌面推送', {
+                                body: '这是我的第一条桌面推送',
+                                // icon: 'some/icon/url'
+                            });
+
+                            notification.onclick = function () {
+
+                                console.log('点击');
+                                notification.close();
+                            };
+                        } else {
+                            Notification.requestPermission();
+                            console.log('没有权限,用户拒绝:Notification');
+                        }
+                    });
+                } else {
+                    // Safari
+                    Notification.requestPermission(function (permission) {
+                        if (permission == "granted") {
+                            var notification = new Notification('桌面推送', {
+                                body: '这是我的第一条桌面推送',
+                                // icon: 'some/icon/url'
+                            });
+
+                            notification.onclick = function () {
+
+                                console.log('点击');
+                                notification.close();
+                            };
+                        } else {
+                            Notification.requestPermission();
+                            console.log('没有权限,用户拒绝:Notification');
+                        }
+                    })
+                }
+            }
+        } else {
+            console.log('不支持Notification');
+        }
+
+    }
+
+    const { clipboard } = require('electron')
+    let code = document.getElementById('code')
+    let copyBtn = document.getElementById('copyBtn')
+    copyBtn.onclick = function () {
+        console.log(code)
+        clipboard.writeText(code.innerHTML)
+    }
+</script>
+
+</html>

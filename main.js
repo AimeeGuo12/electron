@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcRenderer, Notification, BrowserView } = require('electron');
+const { app, BrowserWindow, ipcRenderer, Notification, BrowserView, globalShortcut } = require('electron');
 // 使用IPC模块来调用主进程或者渲染进程
 // ipcMain.handle('perform-action', (event, ...args) => {
 //     // ... do actions on behalf of the Renderer
@@ -7,7 +7,6 @@ const { app, BrowserWindow, ipcRenderer, Notification, BrowserView } = require('
 // const S3 = require('aws-sdk/clients/s3')
 const httpServer = require('http-server')
 const fs = require('fs');
-const { electron } = require('process');
 const root = fs.readdirSync('/')
 
 // console.log(root)
@@ -24,9 +23,16 @@ function createWindow() {
             enableRemoteModule: true
         }
     })
-    require('./main/menu.js')
+    // 要写在ready里
+    globalShortcut.register('ctrl+e', () => {
+        win.loadURL('http://baidu.com') // ctrl+e打开百度页面
+    })
+    // 有时候可能已经被占用，所以进行判断来进行下一步得操作
+    let register = globalShortcut.isRegistered('ctrl+e') ? 'Register Success' : 'Register fail'
+
+    // require('./main/menu.js')
     // win.loadFile('index.html')
-    win.loadFile('index6.html')
+    win.loadFile('./notebook/index.html')
     // const url = path.resolve('file:', __dirname, 'index.html');
     // console.log(url);
     // win.loadURL(url);
@@ -66,6 +72,13 @@ app.on('activate', () => {
 })
 app.on('before-quit', () => {
     return e
+})
+
+app.on('will-quit', function () {
+    // 关闭前注销快捷键
+    globalShortcut.unregister('ctrl+e');
+    // 注销全部快捷键
+    globalShortcut.unregisterAll()
 })
 // event.preventDefault()
 // httpServer.createServer().listen(8080)

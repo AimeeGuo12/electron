@@ -1,1 +1,4 @@
 # electron
+
+###
+ "main": "main.js",
