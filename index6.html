@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dialog</title>
+</head>
+
+<body>
+    <button id='btn'>打开文件</button>
+    <button id='savebtn'>保存文件</button>
+    <button id='messagebtn'>选择弹窗</button>
+    <img id='image' style='width: 100%'>
+
+</body>
+<script>
+    const { dialog } = require('electron').remote
+    const fs = require('fs')
+
+    let btn = document.querySelector('#btn');
+    let savebtn = document.querySelector('#savebtn')
+    let messagebtn = document.querySelector('#messagebtn')
+    btn.onclick = function () {
+        dialog.showOpenDialog({
+            title: '请选择你所需要的文件',
+            defaultPath: 'xiaoying.jpg', // 这个是在文件名那个里
+            filters: [{ name: 'img', extensions: ['jpg', 'png'] }], //这个不重要主要是文件后缀
+            buttonLabel: '打开小樱图片',//'打开小樱图片'
+        }).then((result) => {
+            console.log(result)
+            let image = document.querySelector('#image')
+            image.setAttribute('src', result.filePaths[0])
+        }).catch((err) => {
+            //
+        })
+    }
+
+    savebtn.onclick = function () {
+        dialog.showSaveDialog({
+            title: '保存文件',
+        }).then(result => {
+            console.log(result)
+            fs.writeFileSync(result.filePath, '试一试啊')
+        }).catch(err => {
+            console.log(err)
+        })
+    }
+    messagebtn.onclick = function () {
+        dialog.showMessageBox({
+            type: 'warning',
+            title: '去不去由你',
+            message: '是否去故宫啊',
+            buttons: ['我要去', '不去啦']
+        }).then(result => {
+            console.log(result.response)
+        })
+    }
+</script>
+
+</html>

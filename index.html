@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <title>打开关闭子进程</title>
+</head>
+
+<body>
+    <h1>Hello world</h1>
+    We are using node
+    <script>document.write(process.versions.node)</script>,
+    Chrome
+    <script>document.write(process.versions.chrome)</script>,
+    and Electron
+    <script>document.write(process.versions.electron)</script>,
+    <div class='content'></div>
+    <button id="btn"> 点击弹窗 </button>
+
+    <!-- <button id="btn">
+        打开新的窗口
+    </button>
+    <div>
+
+    </div> -->
+    <a id="aHref" href="https://www.baidu.com/">打开外部链接</a>
+    <div id="myweb">
+        open myweb
+    </div>
+    <div id='fatview'>
+
+    </div>
+    <div id="opentext">
+        opentext
+    </div>
+    <div id="savetxt">
+        savetxt
+    </div>
+    <div id="msgbtn">
+        msgbtn
+    </div>
+    <img src="" alt="" id="openimg" style="width:100%">
+    <script src="./render/openweb.js"></script>
+    <script>
+        const { dialog } = require('electron').remote
+        // const fs = require('fs')
+        let opentext = document.querySelector('#opentext');
+        let savetxt = document.querySelector('#savetxt');
+        let msgbtn = document.querySelector('#msgbtn');
+        opentext.onclick = function (e) {
+            dialog.showOpenDialog({
+                title: '请选择你的文件',
+                defaultPath: '',//默认打开的文件路径选择
+                filters: [{ //过滤掉你不需要的文件格式
+                    name: 'image',
+                    extensions: ['jpg', 'png']
+                }],
+                buttonLabel: '发送表情包'
+            }).then(res => {
+                let openimg = document.querySelector('#openimg');
+                openimg.setAttribute('src', res.filePaths[0])
+            }).catch(req => {
+                console.log(req)
+            })
+        }
+        // savetxt.onclick = function (e) {
+        //     dialog.showSaveDialog({
+        //         title: '保存文件',
+        //     }).then((res) => {
+        //         console.log(res)
+        //         fs.writeFileSync(res.filePaths, '好好学习天天向上')
+        //     }).catch((req) => {
+        //         console.log(req)
+        //     })
+        // }
+        msgbtn.onclick = function (e) {
+            dialog.showMessageBox({
+                type: 'warning',
+                title: '喜欢哪一个？',
+                message: '喜欢迪丽热巴还是古力娜扎',
+                buttons: ['迪丽热巴', '古力娜扎']
+            }).then(res => {
+                console.log(res.response)
+            })
+        }
+    </script>
+
+
+    <hr />
+    <div class="vertical-center">
+        <div class="container">
+            <p>&nbsp;</p>
+            <form role="form" id="chat_form" onsubmit="sendWsMessage(); return false;">
+                <div class="form-group">
+                    <input class="form-control" type="text" name="message" id="message"
+                        placeholder="Type text to echo in here" value="" />
+                </div>
+                <button type="button" id="send" class="btn btn-primary" onclick="sendWsMessage();">
+                    Send!
+                </button>
+            </form>
+        </div>
+    </div>
+    <script>
+        const WebSocket = require('ws');
+        // 我们先实例化了一个websocket对象ws, 其参数为要连接的地址, 这里使用本机localhost的12122端口,
+        // 如果你是在局域网内启动, 也可以将localhost替换为你的内网ip.
+        const ws = new WebSocket('ws://localhost:1212')
+        function sendWsMessage() {
+            console.log(document.querySelector('#message'))
+            console.log(ws)
+            ws.send(document.querySelector('#message').value);
+        }
+    </script>
+    <button onclick="killChildProcess()">关闭子进程</button>
+    <script src="render/index.js"></script>
+</body>
+
+</html>
