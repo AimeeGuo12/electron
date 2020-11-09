@@ -21,12 +21,13 @@ const contextMenuTemplate = [
 ]
 
 const contextMenu = Menu.buildFromTemplate(contextMenuTemplate);
-txtEditor.addEventListener('contextmenu', (e) => {
+txtEditor.addEventListener('contextmenu', (e) => { //使用txtEditor.addEventListener('contextmenu')来监听右键菜单请求
     e.preventDefault();
-    contextMenu.popup(remote.getCurrentWindow());
+    contextMenu.popup(remote.getCurrentWindow());//使用contextMenu.popup(remote.getCurrentWindow())来弹出右键菜单。
 });
 //监控文本框内容是否改变
 txtEditor.oninput = (e) => {
+    // PS：在Win7上如果没有启用Aero效果，使用document.title = xxx或remote.getCurrentWindow().setTitle(xxx)都看不到程序标题栏的标题变化，只当你比如缩放一下窗口后这个修改才会被刷新。
     if (isSaved) document.title += " *";
     isSaved = false;
 }
@@ -36,14 +37,14 @@ txtEditor.oninput = (e) => {
 ipcRenderer.on('action', (event, arg) => {
     switch (arg) {
         case 'new':
-            askSaveIfNeed()
+            if (!askSaveIfNeed()) return
             currentFile = null;
             txtEditor.value = '';
             document.title = 'Notebook - Untitled'
             isSaved = true;
             break;
         case 'open':
-            askSaveIfNeed()
+            if (!askSaveIfNeed()) return
             console.log(remote.getCurrentWindow())
             //使用： dialog.showOpenDialog([browserWindow, ]options[, callback])
             remote.dialog.showOpenDialog(remote.getCurrentWindow(), {
@@ -71,24 +72,52 @@ ipcRenderer.on('action', (event, arg) => {
             askSaveIfNeed();
             ipcRenderer.sendSync('reqaction', 'exit');
             break;
-
     }
 })
 
 // 读取文件
 readText = (file) => {
     const fs = require('fs')
-    return fs.readFileSync(file)
+    return fs.readFileSync(file, 'utf-8')
+}
+//保存文本内容到文件
+function saveText(text, file) {
+    const fs = require('fs');
+    fs.writeFileSync(file, text);
 }
 saveCurrentDoc = () => {
-    dialog.showSaveDialog({
-        title: '保存文件',
-    }).then(result => {
-        console.log(result)
-        fs.writeFileSync(result.filePath, '试一试啊')
-    }).catch(err => {
-        console.log(err)
-    })
+    if (!currentFile) {
+        remote.dialog.showSaveDialog(remote.getCurrentWindow(), {
+            filters: [
+                { name: "Text Files", extensions: ['txt', 'js', 'html', 'md'] },
+                { name: 'All Files', extensions: ['*'] }]
+        }).then(result => {
+            if (result.filePath) {
+                currentFile = result.filePath
+                const txtSave = txtEditor.value;
+                saveText(txtSave, currentFile);
+                isSaved = true;
+                document.title = "Notepad - " + currentFile;
+            }
+        }).catch(err => {
+            console.log(err)
+        })
+    }
+    if (currentFile) {
+        const txtSave = txtEditor.value;
+        saveText(txtSave, currentFile);
+        isSaved = true;
+        document.title = "Notepad - " + currentFile;
+    }
+
+    // remote.dialog.showSaveDialog({
+    //     title: '保存文件',
+    // }).then(result => {
+    //     console.log(result)
+    //     fs.writeFileSync(result.filePath, '试一试啊')
+    // }).catch(err => {
+    //     console.log(err)
+    // })
 }
 askSaveIfNeed = () => {
     if (isSaved) return;
@@ -98,4 +127,5 @@ askSaveIfNeed = () => {
         buttons: ['Yes', 'No']
     });
     if (response == 0) saveCurrentDoc(); //点击Yes按钮后保存当前文档
+    if (response == 1) return false
 }

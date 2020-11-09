@@ -14,15 +14,23 @@ const closeWindow = () => {
     // 手动进行垃圾回收
     win = null;
 };
+
 function createWindow() {
+    //主进程模块BrowserWindow用于创建和控制浏览器窗口。
     const win = new BrowserWindow({
         width: 800,
         height: 600,
         webPreferences: {
             nodeIntegration: true,  // To access the Node.js API from the Renderer process, you need to set the nodeIntegration preference to true
             enableRemoteModule: true
-        }
+        },
+        // transparent: true, //通过将transparent选项设置为true, 还可以使无框窗口透明
+        // frame: false,
+        // titleBarStyle: 'hidden',
     })
+    // 主进程中初始化全局变量
+    global.act = 'smile';
+    global.myField = { name: 'Aimee' }
     // 要写在ready里
     globalShortcut.register('ctrl+e', () => {
         win.loadURL('http://baidu.com') // ctrl+e打开百度页面
@@ -30,9 +38,25 @@ function createWindow() {
     // 有时候可能已经被占用，所以进行判断来进行下一步得操作
     let register = globalShortcut.isRegistered('ctrl+e') ? 'Register Success' : 'Register fail'
 
-    // require('./main/menu.js')
+
+
+    // 子窗口， 该child窗口将始终显示在top窗口顶部.
+    // 子窗口不关闭，无法操作父窗口
+    let child = new BrowserWindow({ parent: win, })
+    child.loadURL('index3.html')
+    child.show()
+
+    //模态窗口 隐藏/最小化时子窗口显示
+    //在所有平台上，可见性状态都会跟踪窗口是否隐藏/最小化。
+    // let child = new BrowserWindow({ parent: win, modal: true, show: false })
+    // child.loadURL('https://github.com')
+    // child.once('ready-to-show', () => {
+    //     child.show()
+    // })
+
+    require('./main/menu.js') // 修改菜单
     // win.loadFile('index.html')
-    win.loadFile('./notebook/index.html')
+    win.loadFile('index4.html')
     // const url = path.resolve('file:', __dirname, 'index.html');
     // console.log(url);
     // win.loadURL(url);
@@ -47,18 +71,38 @@ function createWindow() {
     win.on('closed', closeWindow)
 }
 app.setAppUserModelId('my-electron-app')
-function showNotification() {
-    debugger
-    const notification = {
-        title: 'Basic Notification',
-        body: 'Notification from the Main process',
-        requireInteraction: true
-    }
-    new Notification('teat', notification).show()
-}
-// document.write(app.isReady())
-app.whenReady().then(createWindow).then(showNotification)
+app.whenReady().then(createWindow)
 // app.on('ready', createWindow)
+
+
+
+// net模块 使用 Chromium 的本地网络库发出 HTTP / HTTPS 请求  
+// 它类似于Node.js 的HTTP和HTTPS模块，但使用Chromium的本地网络库而不是Node.js实现，从而更好地支持Web代理。
+
+// 以下是您为什么可以考虑使用net模块而非本地Node.js模块的非详尽列表：
+
+// 自动管理系统代理配置，支持wpad协议和代理pac配置文件。
+// 自动隧道化HTTPS请求。
+// 支持使用基本，摘要，NTLM，Kerberos或协商身份验证方案对代理进行身份验证。
+// 支持流量监控代理：用于访问控制和监控的Fiddler-like代理。
+// 该net模块API已经尽可能接近Node.js的API。包括类，方法，属性和事件名称的API组件类似于Node.js中常用的API组件。
+
+// 例如，以下示例快速显示如何使用netAPI：
+// app.on('ready', () => {
+//     const { net } = require('electron')
+//     const request = net.request('https://github.com')
+//     request.on('response', (response) => {
+//         console.log(`STATUS: ${response.statusCode}`) // 打印在终端了 不是控制台
+//         console.log(`HEADERS: ${JSON.stringify(response.headers)}`)
+//         response.on('data', (chunk) => {
+//             console.log(`BODY: ${chunk}`)
+//         })
+//         response.on('end', () => {
+//             console.log('No more data in response.')
+//         })
+//     })
+//     request.end()
+// })
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit()

@@ -152,6 +152,9 @@ function createWindow() {
 
     win.on('close', (e) => {
         if (!safeExit) {
+            // 这里safeExit开关用于标记渲染进程是否已经向主进程反馈它已经完成所有操作了。
+            // 如果尚未反馈，则使用e.preventDefault()阻止窗口关闭，
+            // 并使用mainWindow.webContents.send('action', 'exiting')向渲染进程发送一个exiting消息，告诉渲染进程
             e.preventDefault();
             win.webContents.send('action', 'exiting')
         }

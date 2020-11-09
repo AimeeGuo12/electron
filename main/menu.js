@@ -12,10 +12,12 @@ let template = [
                         width: 500,
                         height: 500,
                         webPreferences: {
-                            nodeIntegration: true
+                            nodeIntegration: true,
+                            enableRemoteModule: true
                         }
                     })
                     win.loadFile('index3.html')
+                    win.webContents.openDevTools()
                     win.on('closed', function () {
                         win = null
                     })
