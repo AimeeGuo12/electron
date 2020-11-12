@@ -1,5 +1,6 @@
 import React, { useState, useReducer } from 'react';
 
+import logo from '../../static/image/logo.jpg';
 import './index.less';
 function Header() {
 
@@ -14,6 +15,7 @@ function Header() {
     return (
         <div className='m-app-header'>
             <div className='m-app-left'>
+                {/* <img src="logo" width='50%' height='50%' alt=""/> */}
                 <span className='m-app-logo'>网</span>
                 <div className='m-app-page'>
                     {/* <span className='m-app-page-prev' onClick={() => clickHandle('prev')}>{'<'}</span> */}
@@ -21,13 +23,13 @@ function Header() {
                 </div>
             </div>
             <div className='m-app-right'>
-                <img src="" alt="" />
-                <span>{'冬日限定'}</span>
-                <span></span>
-                <span>开通VIP</span>
+                <img src="" alt="" style={{marginRight: '10px'}} />
+                <span style={{marginRight: '10px'}}>{'冬日限定'}</span>
+                <span style={{marginRight: '10px'}}></span>
+                <span style={{marginRight: '10px'}}>开通VIP</span>
                 <div className='m-app-right-tool'>
-                    <span>设置</span>
-                    <span>主题</span>
+                    <span style={{marginRight: '10px'}}>设置</span>
+                    <span style={{marginRight: '10px'}}>主题</span>
                     <span>消息</span>
                 </div>
             </div>

@@ -2,6 +2,8 @@ import React, { useState, useReducer } from 'react';
 
 import HeaderPart from '../Header/index';
 import LeftPart from '../Left/index';
+import RightPart from '../Right/index';
+import Contents from '../Contents/index';
 import './index.less';
 // function Layout() {
 
@@ -34,17 +36,18 @@ import {
 
 const { Header, Content, Footer, Sider } = Layout;
 
-function Layout1() {
+function Layout1(props) {
     return (
 
         <Layout>
             <Header>
                 <HeaderPart></HeaderPart>
             </Header>
-            <Layout>
+            {/* <Layout>
                 <Sider><LeftPart></LeftPart></Sider>
-                <Content>Content</Content>
-            </Layout>
+                <Content><RightPart {...props}></RightPart></Content>
+            </Layout> */}
+            <Contents></Contents>
             <Footer>Footer</Footer>
         </Layout>
     )

@@ -1,25 +1,33 @@
 import React, { useState, useReducer } from 'react';
-
+import { BrowserRouter as Router, Route, Switch, Redirect, Link } from 'react-router-dom';
+// import { connect } from 'react-redux'
+import routerLeftTopMap from '../react-router/routerLeftTopMap'
+import './index.less'
 const topMenu = [
     {
         label: '发现音乐',
-        icon: ''
+        icon: '',
+        path: '/foundMusic'
     },
     {
         label: '视频',
-        icon: ''
+        icon: '',
+        path: '/video'
     },
     {
         label: '朋友',
-        icon: ''
+        icon: '',
+        path: '/friends'
     },
     {
         label: '直播',
-        icon: ''
+        icon: '',
+        path: '/playNow'
     },
     {
         label: '私人FM',
-        icon: ''
+        icon: '',
+        path: '/fM'
     },
 ]
 
@@ -66,23 +74,44 @@ const otherMenu = [
 function Left() {
 
     return (
-        <div>
-            <ul>
-                {topMenu.map((menu) => {
-                    return (
-                        <li key={menu.label}>
-                            <span>{menu.label}</span>
-                            {menu.icon && <span>.</span>}
-                        </li>
-                    )
-                })}
-            </ul>
+        <div className='app-left'>
+            <Router>
+                <ul>
+                    {topMenu.map((menu) => {
+                        return (
+                            <li key={menu.label}>
+                                <Link to={menu.path}><span>{menu.label}</span>
+                                    {menu.icon && <span>.</span>}</Link>
+
+                            </li>
+                        )
+                    })}
+                </ul>
+                <Switch>
+                    {routerLeftTopMap.map((item, index) => {
+                        return <Route key={index} path={item.path} exact render={props =>
+                            // (!item.auth ? (<item.component {...props} />) :
+                            //     (token ? <item.component {...props} /> :
+                            //         <Redirect to={{
+                            //             pathname: '/login', state: { from: props.location }
+                            //         }} />)
+                            // )
+                            <item.component {...props} />
+                        } />
+
+                    })}
+                    {/* // 所有错误路由跳转页面 */}
+                    {/* <Route component={NotFound} /> */}
+                </Switch>
+
+            </Router>
+
             {otherMenu.map((menuItem) => {
                 return (
                     <ul>
                         <span>{menuItem.label}</span>
-                        {menuItem.children && menuItem.children.map((item) => {
-                            return <li>{item.label}</li>
+                        {menuItem.children && menuItem.children.map((item, index) => {
+                            return <li key={item.label}>{item.label}</li>
                         })}
                     </ul>
                 )
