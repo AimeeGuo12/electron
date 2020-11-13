@@ -97,9 +97,9 @@ function Contents() {
 
 
 
-                        {otherMenu.map((menuItem) => {
+                        {otherMenu.map((menuItem, ind) => {
                             return (
-                                <ul>
+                                <ul key={ind}>
                                     <span>{menuItem.label}</span>
                                     {menuItem.children && menuItem.children.map((item, index) => {
                                         return <li key={item.label}>{item.label}</li>

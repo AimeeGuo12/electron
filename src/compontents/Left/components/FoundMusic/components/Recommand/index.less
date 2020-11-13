@@ -1,0 +1,33 @@
+.song-list {
+    width: 100%;
+  
+    .song{
+        width: 100%;
+        // display: flex;
+        // justify-content: space-around;
+        .song-dis{
+            display: inline-block;
+            // flex-direction: column;
+            width: 18%;
+            margin-left: 10px;
+            margin-bottom: 10px;
+            .song-pic{
+                // width: 18%;
+                position: relative;
+                .song-playnum{
+                    position: absolute;
+                    right: 5px;
+                    top: 5px;
+                }
+                p{
+                    overflow:hidden;
+                    text-overflow: ellipsis;
+                    display:-webkit-box;
+                    -webkit-line-clamp:2;		//在这里控制指定行数超出换行哦
+                    -webkit-box-orient:vertical;
+                }
+            }
+        }
+        
+    }
+}
