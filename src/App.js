@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="App container-fluid">
       <div className="row">
-        <div className="col-3 left-panel">
+        <div className="col-6 left-panel">
           {/* <h1>aaa</h1> */}
           <FileSearch
           title='请搜索你要查找的文档'
@@ -14,7 +14,7 @@ function App() {
           >
           </FileSearch>
         </div>
-        <div className="col-9 right-panel">
+        <div className="col-6 right-panel">
           <h1>xxx</h1>
         </div>
       </div>
