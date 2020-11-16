@@ -1,5 +1,5 @@
 import logo from './logo.svg';
-import FileSearch from './react-hook/components/FileSearch';
+import FileSearch from './components/FileSearch';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 function App() {
