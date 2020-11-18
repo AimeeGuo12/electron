@@ -17,6 +17,7 @@ const FileSearch = ({ title, onFileSearch }) => {
         // e.preventDefault()
         setInputActive(false)
         setValue('')
+        onFileSearch(false)
     }
 
     useEffect(() => {
@@ -49,9 +50,10 @@ const FileSearch = ({ title, onFileSearch }) => {
     }, [inputActive])
 
     return (
-        <div className='alert alert-primary d-flex justify-content-between align-item-center mb-0'>
+        <div className="alert alert-primary d-flex justify-content-between align-items-center mb-0"> 
             {!inputActive &&
-                <div>
+            // 这里是div得话， d-flex justify-content-between不起作用
+                <>  
                     <span>{title}</span>
                     <button
                         type='button'
@@ -64,11 +66,11 @@ const FileSearch = ({ title, onFileSearch }) => {
                         size='lg'
                         />
                     </button>
-                </div>
+                </>
             }
 
             { inputActive &&
-               <div>
+               <>
                    <input
                    className=''
                    value={value}
@@ -86,7 +88,7 @@ const FileSearch = ({ title, onFileSearch }) => {
                         icon={faTimes}
                         />
                    </button>
-               </div>
+               </>
             }
         </div>
     )

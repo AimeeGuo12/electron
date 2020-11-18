@@ -6,7 +6,15 @@ const url = require('url')
 let mainWindow
 function createWindow() {
     //创建浏览器窗口,宽高自定义具体大小你开心就好
-    mainWindow = new BrowserWindow({ width: 800, height: 600 })
+    mainWindow = new BrowserWindow({ 
+        width: 800, 
+        height: 600,
+        webPreferences: {
+            nodeIntegration: true,
+          },
+        //   show: false,
+          backgroundColor: '#efefef',
+    })
 
     // const pkg = require('./package.json')
     // console.log('pkg.DEV', pkg.DEV)
