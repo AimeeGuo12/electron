@@ -6,8 +6,9 @@ import FileSearch from './components/FileSearch'
 import FileList from './components/FileList'
 import BottomBtn from './components/BottomBtn'
 import TabList from './components/TabList'
+import Loader from './components/Loader'
 
-import uuidv4 from 'uuid'
+import {v4 as uuidv4} from 'uuid'
 import {flattenArr, objToArr} from './utils/helper'
 import fileHelper from './utils/fileHelper'
 
@@ -17,12 +18,13 @@ import "easymde/dist/easymde.min.css"  // 记得导入编辑器的样式
 import defaultFiles from './utils/defaultFiles'
 
 // require node.js modules  有的bug不能require webpack拦截了，去node_modules中查找不到，报错 这时使用window.require
-const { join, basename, extname, dirname } = require('path')
-const { remote, ipcRenderer } = require('electron')
-const Store = require('electron-store')
-console.log(Store)
-const fileStore = new Store({'name': 'fileStore'})
-const settingsStore = new Store({'name': 'Settings'})
+// const { join, basename, extname, dirname } = require('path')
+// const { remote, ipcRenderer } = require('electron')
+// const Store = require('electron-store')
+const { join, basename, extname, dirname } = window.path
+const { remote, ipcRenderer } = window.electron
+const fileStore = new window.Store({'name': 'fileStore'})
+const settingsStore = new window.Store({'name': 'Settings'})
 // 使用：fileStore.set('key',value) fileStore.get('key') fileStore.delete('key')
 // The data is saved in a JSON file in $ app.getPath('userData').
 //如果需要加密存储 就用下面的
@@ -30,7 +32,7 @@ const settingsStore = new Store({'name': 'Settings'})
 const saveFilesToStore = (files) => {
   // we don't have to store any info in file system, eg: isNew, body ,etc
   const filesStoreObj = objToArr(files).reduce((result, file) => {
-    const [id, path, title, createdAt] = file
+    const {id, path, title, createdAt} = file
     result[id] = {
       id,
       path,
@@ -42,7 +44,7 @@ const saveFilesToStore = (files) => {
   fileStore.set('files', filesStoreObj)
 }
 function App() {
-  const [files, setFiles] = useState(defaultFiles)
+  const [files, setFiles] = useState(fileStore.get('files') || {})
   const [activeFileID, setActiveFileID] = useState('')
   const [openedFileIDs, setOpenedFileIDs] = useState([])
   const [unsavedFileIDs, setUnsavedFileIDs] = useState([])
@@ -50,7 +52,8 @@ function App() {
   const [isLoading, setLoading] = useState(false)
 
   const filesArr = objToArr(files)
-  const savedLocation = settingsStore.get('savedFileLocation') // ?
+  const savedLocation = settingsStore.get('savedFileLocation') || remote.app.getPath('documents') // remote.app.getPath('documents') 用户的文档目录
+  console.log(filesArr)
   console.log(savedLocation)
   // const activeFile = files.find(file=> { return file.id === activeFileID}) // find不改变原数组，返回符合条件的第一个元素，返回的是元素本身，而不是数组，这里是个对象
   // const openedFiles = openedFileIDs.map((openID) => {
@@ -58,18 +61,21 @@ function App() {
   // })
   const activeFile = files[activeFileID]
   const openedFiles = openedFileIDs.map((openID) => {
+    console.log(files)
     return files[openID]
   })
 
 
   const fileClick = (fileID) => {
+    console.log(fileID)
     setActiveFileID(fileID)
     // const currentFile = files[fileID]
     // const {id, title} = currentFile
 
     if (!openedFileIDs.includes(fileID)){
-      setOpenedFileIDs(openedFileIDs => [ ...openedFileIDs, fileID])
-      console.log(openedFileIDs)
+      // setOpenedFileIDs(openedFileIDs => [ ...openedFileIDs, fileID])
+      setOpenedFileIDs([ ...openedFileIDs, fileID ])
+      // console.log(openedFileIDs)
     }
 
   }
@@ -127,6 +133,7 @@ function App() {
 
     const modifiedFile = {...files[id], title, isNew: false, path: newPath}
     const newFiles = { ...files, [id]: modifiedFile}
+
     if (isNew) {
       fileHelper.writeFile(newPath, files[id].body).then(() => {
         setFiles(newFiles)
@@ -144,6 +151,18 @@ function App() {
  
   // }, [])
   const fileListArr = searchedFiles.length > 0 ? searchedFiles : filesArr
+ 
+  const createNewFile = () => {
+    const newID = uuidv4()
+    const newFile = {
+      id: newID,
+      title: '',
+      body: '##请输入MarkDown',
+      createdAt: new Date().getTime(),
+      isNew: true,
+    }
+    setFiles({...files, [newID]: newFile})
+  }
   return (
     <div className="App container-fluid">
       <div className="row">
@@ -166,7 +185,7 @@ function App() {
                 text={'新建'}
                 colorClass={'btn-primary'}
                 icon={faPlus}
-                onBtnClick={() => { }}
+                onBtnClick={createNewFile}
               />
             </div>
             <div className='col'>

@@ -1,3 +1,7 @@
+#root {
+  border: 1px solid #ccc;
+}
+
 .icon-button {
   background: none;
   border: none;
@@ -15,7 +19,11 @@
 }
 .left-panel {
   min-height: 100vh;
+  padding-left: 0px;
   position: relative;
+}
+.file-list {
+  border-radius: 0px;
 }
 .button-group {
   position: absolute;

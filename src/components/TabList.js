@@ -5,7 +5,7 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons'
 import PropTypes from 'prop-types'
 import './TabList.scss'
 const TabList = ({ files, activeId, unsaveIds, onTabClick, onCloseTab }) => {
-
+    console.log(files, activeId, unsaveIds)
     return (
         <ul className='nav nav-pills tablist-component'>
             {
@@ -17,7 +17,7 @@ const TabList = ({ files, activeId, unsaveIds, onTabClick, onCloseTab }) => {
                         'withUnsaved': withUnsavedMark
                     })
                     return (
-                        <li className='nav-item' key={file.id}>
+                        <li className='nav-item nav-border' key={file.id}>
                             <a href="#"
                              className={fClassName}
                              onClick={(e) => {e.preventDefault(); onTabClick(file.id)}}
@@ -38,8 +38,16 @@ const TabList = ({ files, activeId, unsaveIds, onTabClick, onCloseTab }) => {
                 })
             }
         </ul>
-
     )
 }
-
+TabList.propTypes = {
+    files: PropTypes.array,
+    activeId: PropTypes.string,
+    unsaveIds: PropTypes.array,
+    onTabClick: PropTypes.func,
+    onCloseTab: PropTypes.func,
+  }
+  TabList.defaultProps = {
+    unsaveIds: []
+  }
 export default TabList

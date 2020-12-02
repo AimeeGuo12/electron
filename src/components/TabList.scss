@@ -1,4 +1,8 @@
 .tablist-component {
+    .nav-border{
+      border-left: 1px solid #ccc;
+      border-right: 1px solid #ccc;
+    }
     .close-icon {
       visibility: hidden;
     }

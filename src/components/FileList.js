@@ -11,21 +11,36 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
     let node = useRef(null)
     const enterPressed = useKeyPress(13)
     const escPressed = useKeyPress(27)
-    const closeSearch = (file) => {
+    const closeSearch = (editItem) => {
         setEditStatus(false)
         setValue('')
-
+        // 如果正在编辑一个新增的文件名，关闭即删除此次新增
+        if (editItem.isNew) {
+            onFileDelete(editItem.id)
+        }
     }
     useEffect(() => {
-        if (enterPressed && editStatus) {
-            // onFileSearch(value)
+        const editItem = files.find(file => file.id === editStatus)  // ? ===editStatus?
+        if (enterPressed && editStatus && value.trim() !== '') {
+            onSaveEdit(editItem.id, value, editItem.isNew)
+            setEditStatus(false)
+            setValue('')
         }
         if(escPressed && editStatus) {
-            closeSearch()
+            closeSearch(editItem)
         }
     })
     useEffect(() => {
+        const newFile = files.find(file => file.isNew)
+        if (newFile) {
+            // 这里变为存入的是文件id
+          setEditStatus(newFile.id)
+          setValue(newFile.title)
+        }
+      }, [files])
+    useEffect(() => {
         if (editStatus) {
+            // 聚焦
             node.current.focus()
         }
     }, [editStatus])
@@ -37,8 +52,8 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
                         className='list-group-item bg-light row d-flex align-items-center file-item mx-0'
                         key={file.id}
                     >
-                        {(file.id !== editStatus) &&
-                            <div>
+                        {(file.id !== editStatus && !file.isNew) &&
+                            <>
                                 <span className='col-2'>
                                     <FontAwesomeIcon
                                         size='lg'
@@ -46,20 +61,20 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
                                     />
                                 </span>
                                 <span
-                                    className='col-6 c-link'
+                                    className='col-10 c-link'
                                     onClick={() => { onFileClick(file.id) }}
                                 >
                                     {file.title}
                                 </span>
                                 
-                                <button className='icon-button col-2' type='btn' onClick={() => {onSaveEdit(file.id)}}>编辑</button>
-                                <button className='icon-button col-2' type='btn' onClick={() => {onFileDelete(file.id, file.title, file.isNew)}}>删除</button>
-                            </div>
+                                {/* <button className='icon-button col-1' type='btn' onClick={() => {onSaveEdit(file.id)}}>编辑</button> */}
+                                {/* <button className='icon-button col-1' type='btn' onClick={() => {onFileDelete(file.id, file.title, file.isNew)}}>删除</button> */}
+                            </>
                         }
 
                         {
-                            ((file.id === editStatus)) &&
-                            <div>
+                            ((file.id === editStatus || file.isNew)) &&
+                            <>
                                 <input
                                     className='form-control col-10'
                                     value={value}
@@ -78,7 +93,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
                                         icon={faTimes}
                                     />
                                 </button>
-                            </div>
+                            </>
                         }
                     </li>
                 )
