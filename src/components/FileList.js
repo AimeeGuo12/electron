@@ -4,7 +4,8 @@ import { faTimes } from '@fortawesome/free-solid-svg-icons'
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons'
 import PropTypes from 'prop-types'
 import useKeyPress from '../hooks/useKeyPress'
-
+import useContextMenu from '../hooks/useContextMenu'
+import {getParentNode} from '../utils/helper'
 const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
     const [editStatus, setEditStatus] = useState(false)
     const [value, setValue] = useState('')
@@ -44,6 +45,40 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
             node.current.focus()
         }
     }, [editStatus])
+    const clickedItem = useContextMenu([
+        {
+            label: '打开',
+            click: () => {
+                // 由于这里获取到的clickedItem 不是li 而是里面的子节点 所以通过子节点获取到li
+                const parentElement = getParentNode(clickedItem.current, 'file-item')
+                if (parentElement) {
+                    onFileClick(parentElement.dataset.id)
+                  }
+            }
+        },
+        {
+            label: '重命名',
+            click: () => {
+              const parentElement = getParentNode(clickedItem.current, 'file-item')
+              if (parentElement) {
+                const { id, title } = parentElement.dataset
+                setEditStatus(id)
+                setValue(title)
+              }
+            }
+          },
+          {
+            label: '删除',
+            click: () => {
+              const parentElement = getParentNode(clickedItem.current, 'file-item')
+              if (parentElement) {
+                  console.log(parentElement, parentElement.dataset.id)
+                onFileDelete(parentElement.dataset.id)
+              }
+            }
+          },
+    ], '.file-list', [files]) // files中如loader等有任何变化都会触发
+
     return (
         <ul className='list-group list-group-flush file-list'>
             {files.map(file => {
@@ -51,6 +86,8 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
                     <li
                         className='list-group-item bg-light row d-flex align-items-center file-item mx-0'
                         key={file.id}
+                        data-id={file.id}  // 通过这种方法获取点击元素的 id和title element.dataset.id
+                        data-title={file.title}
                     >
                         {(file.id !== editStatus && !file.isNew) &&
                             <>

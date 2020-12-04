@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { faPlus, faFileImport } from '@fortawesome/free-solid-svg-icons'
 
 import SimpleMDE from "react-simplemde-editor"
@@ -11,7 +11,7 @@ import Loader from './components/Loader'
 import {v4 as uuidv4} from 'uuid'
 import {flattenArr, objToArr} from './utils/helper'
 import fileHelper from './utils/fileHelper'
-
+import useIpcRenderer from './hooks/useIpcRenderer'
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import "easymde/dist/easymde.min.css"  // 记得导入编辑器的样式
@@ -25,6 +25,8 @@ const { join, basename, extname, dirname } = window.path
 const { remote, ipcRenderer } = window.electron
 const fileStore = new window.Store({'name': 'fileStore'})
 const settingsStore = new window.Store({'name': 'Settings'})
+
+// 电脑存储位置在 C:\Users\Administrator\AppData\Roaming\cloud-doc
 // 使用：fileStore.set('key',value) fileStore.get('key') fileStore.delete('key')
 // The data is saved in a JSON file in $ app.getPath('userData').
 //如果需要加密存储 就用下面的
@@ -53,21 +55,17 @@ function App() {
 
   const filesArr = objToArr(files)
   const savedLocation = settingsStore.get('savedFileLocation') || remote.app.getPath('documents') // remote.app.getPath('documents') 用户的文档目录
-  console.log(filesArr)
-  console.log(savedLocation)
   // const activeFile = files.find(file=> { return file.id === activeFileID}) // find不改变原数组，返回符合条件的第一个元素，返回的是元素本身，而不是数组，这里是个对象
   // const openedFiles = openedFileIDs.map((openID) => {
   //   return files.find(file => file.id === openID)
   // })
   const activeFile = files[activeFileID]
   const openedFiles = openedFileIDs.map((openID) => {
-    console.log(files)
     return files[openID]
   })
 
 
   const fileClick = (fileID) => {
-    console.log(fileID)
     setActiveFileID(fileID)
     // const currentFile = files[fileID]
     // const {id, title} = currentFile
@@ -113,11 +111,11 @@ function App() {
 
   const deleteFile = (id) => {
     if (files[id].isNew) {
-      const {id: value, ...afterDelete} = files
+      const {[id]: value, ...afterDelete} = files  // [id]的[] 别忘！！
       setFiles(afterDelete)
     } else {
       fileHelper.deleteFile(files[id].path).then(() => {
-        const {id: value, ...afterDelete} = files
+        const {[id]: value, ...afterDelete} = files
         setFiles(afterDelete)
         saveFilesToStore(afterDelete)
         closeTab(id)
@@ -163,10 +161,69 @@ function App() {
     }
     setFiles({...files, [newID]: newFile})
   }
+
+  const saveCurrentFile = () => {
+    console.log(activeFile)
+    const {title, body, path} = activeFile
+    fileHelper.writeFile(path, body).then(() => {
+      setUnsavedFileIDs(unsavedFileIDs.filter(id => id !== activeFile.id))
+
+    })
+  }
+ const importFiles = () => {
+   remote.dialog.showOpenDialog({
+     title: '选择导入的 MarkDown 文件',
+     properties: ['openFile', 'multiSelections'],
+     filter: [
+       {name: 'MarkDown files', extensions: ['md']}
+     ]
+   }).then(paths => {
+     if (Array.isArray) {
+       // filter out the path we already have in electron store
+        // ["/Users/liusha/Desktop/name1.md", "/Users/liusha/Desktop/name2.md"]
+       const filteredPaths = paths.filter(path => {
+         const alreadyAdded = Object.values(files).find(file => {
+           return file.path === path
+         })
+         return !alreadyAdded
+       })
+
+       const importFilesArr = filteredPaths.forEach(path => {
+         return {
+           id: uuidv4(),
+           title: basename(path, extname(path)),
+           path
+         }
+       })
+       const newFiles = {...files, ...flattenArr(importFilesArr)}
+       setFiles(newFiles)
+       saveFilesToStore(newFiles)
+       if (importFilesArr.length > 0) {
+        remote.dialog.showMessageBox({
+          type: 'info',
+          title: `成功导入了${importFilesArr.length}个文件`,
+          message: `成功导入了${importFilesArr.length}个文件`,
+        })
+      }
+     }
+   })
+ }
+
+  // 菜单栏的行为  从主进程发送过来的
+  useIpcRenderer({
+    'create-new-file': createNewFile,
+    'import-file': importFiles,
+    'save-edit-file': saveCurrentFile,
+    // 'active-file-uploaded': activeFileUploaded,
+    // 'file-downloaded': activeFileDownloaded,
+    // 'files-uploaded': filesUploaded,
+    'loading-status': (message, status) => { setLoading(status) }
+  })
   return (
-    <div className="App container-fluid">
-      <div className="row">
-        <div className="col-4 left-panel">
+    <div className="App container-fluid px-0">
+      { isLoading && <Loader/>}
+      <div className="row no-gutters">
+        <div className="col-4 bg-light left-panel">
           <FileSearch
             title='My Document'
             onFileSearch={fileSearch}
@@ -193,7 +250,7 @@ function App() {
                 text={'导入'}
                 colorClass={'btn-success'}
                 icon={faFileImport}
-                onBtnClick={() => { }}
+                onBtnClick={importFiles}
               />
             </div>
           </div>
