@@ -1,3 +1,6 @@
+//main.js是引入模块
+// app模块：控制应用的生命周期
+// BrowserWindow模块:创建浏览器窗口
 const { app, BrowserWindow, ipcRenderer, Notification, BrowserView, globalShortcut } = require('electron');
 // 使用IPC模块来调用主进程或者渲染进程
 // ipcMain.handle('perform-action', (event, ...args) => {
@@ -20,9 +23,13 @@ function createWindow() {
     const win = new BrowserWindow({
         width: 800,
         height: 600,
+        // resizable:false, // 是否可改变宽高，默认true
+        // movable:false,   // 是否可拖拽，默认true
         webPreferences: {
-            nodeIntegration: true,  // To access the Node.js API from the Renderer process, you need to set the nodeIntegration preference to true
-            enableRemoteModule: true
+            nodeIntegration: true,  // 是否集成Node.js
+            enableRemoteModule: true // 是否允许渲染进程 调用主进程模块
+            // 1.为了在渲染进程中使用require()，还需要启用 nodeIntegration 。
+            // 2.从v9版本开始，remote除非将 enableRemoteModule 设置为true，否则不允许在渲染进程中使用。
         },
         // transparent: true, //通过将transparent选项设置为true, 还可以使无框窗口透明
         // frame: false,
