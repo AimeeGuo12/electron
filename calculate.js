@@ -1,6 +1,6 @@
 // 计算器的入口文件
 
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain} = require('electron')
 const path = require('path');
 
 let win;
@@ -45,3 +45,7 @@ app.setAppUserModelId('my-electron-app')
 app.whenReady().then(createWindow)
 
 
+ipcMain.on('myName',function(event,msg){
+    console.log('Main:',msg);
+  })
+  
